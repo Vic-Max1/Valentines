@@ -1,6 +1,55 @@
-function moveNoButton() {
-    // Existing code...
-    // Replace playBeep(500) with the new sound effect
-    playSoundEffect(400, 800, 0.3);
-    // Remaining code...
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Day Celebration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffcccb;
+            text-align: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: pink;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Happy Valentine's Day!</h1>
+    <button class="button" id="noButton">Don't Click Me!</button>
+    <script>
+        const noButton = document.getElementById('noButton');
+        let interval;
+
+        function moveNoButton() {
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            noButton.style.transform = `translate(${x}px, ${y}px)`;
+            playRisingPitch();
+        }
+
+        function playRisingPitch() {
+            let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let oscillator = audioCtx.createOscillator();
+            oscillator.type = 'sine';
+            let frequency = 400;
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            for (let i = 0; i <= 300; i += 10) {
+                oscillator.frequency.setValueAtTime(frequency + (i / 10), audioCtx.currentTime + i / 1000);
+            }
+            oscillator.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        noButton.addEventListener('mouseover', moveNoButton);
+
+        alert('Yay! 💕 Looking forward to Saturday! 🥰🎉✨');
+    </script>
+</body>
+</html>

@@ -45,10 +45,17 @@
       margin-bottom: 30px;
     }
 
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      position: relative;
+      min-height: 60px;
+    }
+
     button {
       font-size: 1.2rem;
       padding: 12px 30px;
-      margin: 10px;
       border: none;
       border-radius: 30px;
       cursor: pointer;
@@ -60,11 +67,11 @@
     }
 
     #noBtn {
-      position: absolute;
+      position: fixed;
       background-color: #999;
       color: white;
-      left: 50%;
-      transform: translateX(-50%);
+      transition: all 0.3s ease;
+      left: 60%;
     }
 
     /* Floating hearts */
@@ -104,15 +111,19 @@
 
   <div class="container">
     <h1>Do you want to be my Valentine? 💖</h1>
-    <button id="yesBtn">Yes</button>
-    <button id="noBtn">No</button>
+    <div class="button-container">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
   </div>
 
   <script>
     const noBtn = document.getElementById("noBtn");
     const yesBtn = document.getElementById("yesBtn");
+    const container = document.querySelector(".container");
 
-    let dodgeRadius = 120;
+    let dodgeRadius = 150;
+    let isInitialPosition = true;
 
     /* Audio (Web Audio API) */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -130,30 +141,57 @@
     }
 
     function moveNoButton() {
-      dodgeRadius += 15; // speeds up / reacts earlier
       playBeep(500);
 
       const rect = noBtn.getBoundingClientRect();
-      const x = Math.random() * (window.innerWidth - rect.width);
-      const y = Math.random() * (window.innerHeight - rect.height);
+      const margin = 20;
+      
+      let newX, newY;
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      // Find a position that keeps the button visible
+      do {
+        newX = margin + Math.random() * (window.innerWidth - rect.width - margin * 2);
+        newY = margin + Math.random() * (window.innerHeight - rect.height - margin * 2);
+        attempts++;
+      } while (attempts < maxAttempts && (
+        newX < margin || 
+        newX > window.innerWidth - rect.width - margin ||
+        newY < margin || 
+        newY > window.innerHeight - rect.height - margin
+      ));
 
-      noBtn.style.left = `${x}px`;
-      noBtn.style.top = `${y}px`;
-      noBtn.style.transform = "none";
+      noBtn.style.left = `${newX}px`;
+      noBtn.style.top = `${newY}px`;
+      
+      isInitialPosition = false;
     }
 
     /* Desktop dodge */
     document.addEventListener("mousemove", (e) => {
       const rect = noBtn.getBoundingClientRect();
+      const buttonCenterX = rect.left + rect.width / 2;
+      const buttonCenterY = rect.top + rect.height / 2;
+      
       const distance = Math.hypot(
-        e.clientX - (rect.left + rect.width / 2),
-        e.clientY - (rect.top + rect.height / 2)
+        e.clientX - buttonCenterX,
+        e.clientY - buttonCenterY
       );
-      if (distance < dodgeRadius) moveNoButton();
+      
+      if (distance < dodgeRadius) {
+        moveNoButton();
+      }
     });
 
     /* Mobile dodge */
     noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    /* Prevent clicking No button */
+    noBtn.addEventListener("click", (e) => {
       e.preventDefault();
       moveNoButton();
     });
